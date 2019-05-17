@@ -19,6 +19,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
 			os.Exit(1)
 		}
+		fmt.Printf("HTTP status: %v\n", resp.Status)
 		for {
 			w, err := io.Copy(os.Stdout, resp.Body)
 			if err == io.EOF || w == 0 {
