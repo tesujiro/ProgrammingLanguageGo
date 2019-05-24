@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/tesujiro/ProgrammingLanguageGo/ch02/ex2.3/popcount"
+	"github.com/tesujiro/ProgrammingLanguageGo/ch02/ex2.3-2.5/popcount"
 )
 
 func BenchmarkMain(b *testing.B) {
@@ -16,6 +16,10 @@ func BenchmarkMain(b *testing.B) {
 
 	b.Run("OneStep", func(b *testing.B) {
 		benchmark(b, popcount.PopCount)
+	})
+
+	b.Run("OneBit", func(b *testing.B) {
+		benchmark(b, popcount.PopCount3)
 	})
 
 	return

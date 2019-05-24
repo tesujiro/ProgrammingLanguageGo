@@ -21,10 +21,21 @@ func PopCount(x uint64) int {
 		pc[byte(x>>(7*8))])
 }
 
+// excercise 2.3
 func PopCount2(x uint64) int {
 	result := 0
 	for i := uint(0); i < 9; i++ {
 		result += int(pc[byte(x>>(i*8))])
+	}
+	return result
+}
+
+// excercise 2.4
+func PopCount3(x uint64) int {
+	result := 0
+	for i := uint(0); i <= 64; i++ {
+		result += int(x) & 1
+		x = uint64(x >> 1)
 	}
 	return result
 }
