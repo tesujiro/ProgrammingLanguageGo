@@ -11,5 +11,6 @@ func main() {
 		fmt.Println(popcount.PopCount(uint64(i)))
 		fmt.Println(popcount.PopCount2(uint64(i)))
 		fmt.Println(popcount.PopCount3(uint64(i)))
+		fmt.Println(popcount.PopCount4(uint64(i)))
 	}
 }

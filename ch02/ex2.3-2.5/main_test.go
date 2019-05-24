@@ -10,16 +10,20 @@ func BenchmarkMain(b *testing.B) {
 
 	b.ResetTimer()
 
-	b.Run("Loop", func(b *testing.B) {
-		benchmark(b, popcount.PopCount2)
-	})
-
 	b.Run("OneStep", func(b *testing.B) {
 		benchmark(b, popcount.PopCount)
 	})
 
-	b.Run("OneBit", func(b *testing.B) {
+	b.Run("Loop", func(b *testing.B) {
+		benchmark(b, popcount.PopCount2)
+	})
+
+	b.Run("OneBitLoop", func(b *testing.B) {
 		benchmark(b, popcount.PopCount3)
+	})
+
+	b.Run("X&(X-1) Loop", func(b *testing.B) {
+		benchmark(b, popcount.PopCount4)
 	})
 
 	return

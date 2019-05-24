@@ -39,3 +39,12 @@ func PopCount3(x uint64) int {
 	}
 	return result
 }
+
+// excercise 2.5
+func PopCount4(x uint64) int {
+	c := 0
+	for ; x > 0; x = x & (x - 1) {
+		c++
+	}
+	return c
+}
