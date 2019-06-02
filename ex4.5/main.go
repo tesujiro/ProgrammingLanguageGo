@@ -17,7 +17,9 @@ func main() {
 	}
 
 	list := []string{"hello", "world", "world", "hello"}
+	//slice := list[:]
 	fmt.Println(list)
 	uniq(&list)
 	fmt.Println(list)
+	//fmt.Println(slice)
 }
