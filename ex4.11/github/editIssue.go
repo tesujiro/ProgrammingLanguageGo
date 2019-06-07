@@ -53,11 +53,10 @@ func CreateIssue(owner, repo, number string) (*Issue, error) {
 	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("failed to edit issue: %s", resp.Status)
 	}
-	//var issue Issue
-	if err = json.NewDecoder(resp.Body).Decode(&issue); err != nil {
+	var ret Issue
+	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
-	is := Issue{Title: issue.Title, State: issue.State, Body: issue.Body}
-	return &is, nil
+	return &ret, nil
 
 }
