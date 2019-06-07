@@ -3,4 +3,4 @@ all:
 	go run main.go search tesujiro/ProgrammingLanguageGo
 
 create:
-	go run main.go create tesujiro ProgrammingLanguageGo 1
+	go run main.go create tesujiro ProgrammingLanguageGo

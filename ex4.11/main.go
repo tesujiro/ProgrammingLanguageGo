@@ -32,11 +32,11 @@ func main() {
 		fmt.Println("argument error 2")
 		os.Exit(1)
 	}
-	owner, repo, number := args[0], args[1], args[2]
 
 	switch {
-	case cmd == "create" && len(args) == 3:
-		result, err := github.CreateIssue(owner, repo, number)
+	case cmd == "create" && len(args) == 2:
+		owner, repo := args[0], args[1]
+		result, err := github.CreateIssue(owner, repo)
 		if err != nil {
 			log.Fatal(err)
 		}

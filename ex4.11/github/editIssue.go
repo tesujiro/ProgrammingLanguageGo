@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func CreateIssue(owner, repo, number string) (*Issue, error) {
+func CreateIssue(owner, repo) (*Issue, error) {
 	issue := EditIssue{Title: "gopl exercise 4.11"}
 	if err := issue.Edit(); err != nil {
 		log.Fatal(err)
@@ -37,7 +37,6 @@ func CreateIssue(owner, repo, number string) (*Issue, error) {
 	*/
 
 	client := &http.Client{}
-	//url := strings.Join([]string{APIURL, "repos", owner, repo, "issues", number}, "/")
 	url := strings.Join([]string{APIURL, "repos", owner, repo, "issues"}, "/")
 	fmt.Println("url=", url)
 	req, err := http.NewRequest("POST", url, buf)
