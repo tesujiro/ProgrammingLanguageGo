@@ -28,10 +28,6 @@ func main() {
 		}
 		os.Exit(0)
 	}
-	if len(args) < 3 {
-		fmt.Println("argument error 2")
-		os.Exit(1)
-	}
 
 	switch {
 	case cmd == "create" && len(args) == 2:

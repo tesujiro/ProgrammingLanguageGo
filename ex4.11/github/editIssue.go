@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func CreateIssue(owner, repo) (*Issue, error) {
+func CreateIssue(owner, repo string) (*Issue, error) {
 	issue := EditIssue{Title: "gopl exercise 4.11"}
 	if err := issue.Edit(); err != nil {
 		log.Fatal(err)
