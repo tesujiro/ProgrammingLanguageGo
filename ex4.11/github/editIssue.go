@@ -9,8 +9,9 @@ import (
 	"strings"
 )
 
-func CreateIssue(owner, repo string) (*Issue, error) {
-	buf := &bytes.Buffer{}
+func CreateIssue(owner, repo, number string) (*Issue, error) {
+	var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
+	buf := bytes.NewBuffer(jsonStr)
 	/*
 		encoder := json.NewEncoder(buf)
 			err := encoder.Encode(fields)
@@ -20,8 +21,10 @@ func CreateIssue(owner, repo string) (*Issue, error) {
 	*/
 
 	client := &http.Client{}
+	//url := strings.Join([]string{APIURL, "repos", owner, repo, "issues", number}, "/")
 	url := strings.Join([]string{APIURL, "repos", owner, repo, "issues"}, "/")
-	req, err := http.NewRequest("PATCH", url, buf)
+	fmt.Println("url=", url)
+	req, err := http.NewRequest("POST", url, buf)
 	req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_PASS"))
 	if err != nil {
 		return nil, err
@@ -31,7 +34,7 @@ func CreateIssue(owner, repo string) (*Issue, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("failed to edit issue: %s", resp.Status)
 	}
 	var issue Issue

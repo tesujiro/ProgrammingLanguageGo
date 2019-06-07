@@ -16,12 +16,6 @@ func main() {
 	cmd := os.Args[1]
 	args := os.Args[2:]
 
-	/*
-		if len(args) < 3 {
-			fmt.Println("argument error")
-			os.Exit(1)
-		}
-	*/
 	if cmd == "search" && len(args) > 0 {
 		result, err := github.SearchIssues(args)
 		if err != nil {
@@ -35,21 +29,21 @@ func main() {
 		os.Exit(0)
 	}
 	if len(args) < 3 {
-		fmt.Println("argument error")
+		fmt.Println("argument error 2")
 		os.Exit(1)
 	}
-	owner, repo := args[0], args[1]
+	owner, repo, number := args[0], args[1], args[2]
 
 	switch {
-	case cmd == "create" && len(args) == 2:
-		result, err := github.CreateIssue(owner, repo)
+	case cmd == "create" && len(args) == 3:
+		result, err := github.CreateIssue(owner, repo, number)
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Printf("issue: %v\n", *result)
 
 	default:
-		fmt.Println("argument error")
+		fmt.Println("argument error 3")
 		os.Exit(1)
 	}
 
