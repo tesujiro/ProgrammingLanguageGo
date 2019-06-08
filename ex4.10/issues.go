@@ -21,7 +21,7 @@ func main() {
 	ageCategory := func(t time.Time) string {
 		switch {
 		case t.After(oneMonthBefore):
-			return "less than a month old,"
+			return "less than a month old"
 		case t.After(oneYearBefore):
 			return "iess than a year old"
 		default:
