@@ -11,7 +11,7 @@ import (
 )
 
 func CreateIssue(owner, repo string) (*Issue, error) {
-	issue := EditableIssue{Title: "gopl exercise 4.11", Labels: []string{"gopl"}}
+	issue := EditableIssue{Title: "gopl exercise 4.11"}
 	if err := issue.Edit(); err != nil {
 		log.Fatal(err)
 	}
@@ -43,6 +43,8 @@ func CreateIssue(owner, repo string) (*Issue, error) {
 	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("failed to edit issue: %s", resp.Status)
 	}
+	//body, _ := ioutil.ReadAll(resp.Body)
+	//fmt.Printf("Response Body: %s\n", body)
 	var ret Issue
 	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		return nil, err

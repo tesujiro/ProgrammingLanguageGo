@@ -22,18 +22,16 @@ type IssuesSearchResult struct {
 type Issue struct {
 	Number    int
 	HTMLURL   string `json:"html_url"`
-	Title     string `json:"title"`
-	State     string `json:"state"`
 	User      *User
 	CreatedAt time.Time `json:"created_at"`
-	Body      string    `json:"body"` // in Markdown format
+	EditableIssue
 }
 
 type EditableIssue struct {
-	Title  string   `json:"title"`
-	State  string   `json:"state"`
-	Body   string   `json:"body"` // in Markdown format
-	Labels []string `json:"labels"`
+	Title string `json:"title"`
+	State string `json:"state"`
+	Body  string `json:"body"` // in Markdown format
+	//Labels []string `json:"labels"`  // request labels and response labels are different
 }
 
 func (edit *EditableIssue) Edit() error {
