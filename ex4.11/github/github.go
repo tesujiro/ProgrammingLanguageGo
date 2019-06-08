@@ -22,20 +22,21 @@ type IssuesSearchResult struct {
 type Issue struct {
 	Number    int
 	HTMLURL   string `json:"html_url"`
-	Title     string
-	State     string
+	Title     string `json:"title"`
+	State     string `json:"state"`
 	User      *User
 	CreatedAt time.Time `json:"created_at"`
-	Body      string    // in Markdown format
+	Body      string    `json:"body"` // in Markdown format
 }
 
-type EditIssue struct {
-	Title string `json:"title"`
-	State string `json:"state"`
-	Body  string `json:"body"` // in Markdown format
+type EditableIssue struct {
+	Title  string   `json:"title"`
+	State  string   `json:"state"`
+	Body   string   `json:"body"` // in Markdown format
+	Labels []string `json:"labels"`
 }
 
-func (edit *EditIssue) Edit() error {
+func (edit *EditableIssue) Edit() error {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "vim"

@@ -11,36 +11,27 @@ import (
 )
 
 func CreateIssue(owner, repo string) (*Issue, error) {
-	issue := EditIssue{Title: "gopl exercise 4.11"}
+	issue := EditableIssue{Title: "gopl exercise 4.11", Labels: []string{"gopl"}}
 	if err := issue.Edit(); err != nil {
 		log.Fatal(err)
 	}
-	/*
-		var jsonStr = []byte(`
-			{
-				"title":"Buy cheese and bread for breakfast.",
-				"labels": ["gopl"]
-			}`)
-	*/
 	jsonStr, err := json.Marshal(issue)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("json: %s\n", jsonStr)
 	buf := bytes.NewBuffer(jsonStr)
-	/*
-		encoder := json.NewEncoder(buf)
-			err := encoder.Encode(fields)
-			if err != nil {
-				return nil, err
-			}
-	*/
 
 	client := &http.Client{}
 	url := strings.Join([]string{APIURL, "repos", owner, repo, "issues"}, "/")
-	fmt.Println("url=", url)
+	//fmt.Println("url=", url)
 	req, err := http.NewRequest("POST", url, buf)
-	req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_PASS"))
+	github_user := os.Getenv("GITHUB_USER")
+	github_pass := os.Getenv("GITHUB_PASS")
+	if github_user == "" || github_pass == "" {
+		log.Fatal("env not set: GITHUB_USER, GITHUB_PASS")
+	}
+	req.SetBasicAuth(github_user, github_pass)
 	if err != nil {
 		return nil, err
 	}
