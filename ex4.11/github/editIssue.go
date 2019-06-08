@@ -11,7 +11,7 @@ import (
 )
 
 func CreateIssue(owner, repo string) (*Issue, error) {
-	issue := EditableIssue{Title: "gopl exercise 4.11"}
+	issue := EditableIssue{Title: "gopl exercise 4.11", State: "open"}
 	if err := issue.Edit(); err != nil {
 		log.Fatal(err)
 	}
@@ -50,5 +50,4 @@ func CreateIssue(owner, repo string) (*Issue, error) {
 		return nil, err
 	}
 	return &ret, nil
-
 }

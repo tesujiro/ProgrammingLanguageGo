@@ -11,18 +11,21 @@ import (
 	"time"
 )
 
-const IssuesURL = "https://api.github.com/search/issues"
 const APIURL = "https://api.github.com"
 
-type IssuesSearchResult struct {
-	TotalCount int `json:"total_count"`
-	Items      []*Issue
+type GitHubAPI struct {
+	url string
 }
 
+func (api *GitHubAPI) setUrlPath(list []string) {
+}
+
+type IssuesSearchResult []Issue
+
 type Issue struct {
-	Number    int
-	HTMLURL   string `json:"html_url"`
-	User      *User
+	Number    int    `json:"number"`
+	HTMLURL   string `json:"url"`
+	User      map[string]json.RawMessage
 	CreatedAt time.Time `json:"created_at"`
 	EditableIssue
 }
@@ -31,7 +34,7 @@ type EditableIssue struct {
 	Title string `json:"title"`
 	State string `json:"state"`
 	Body  string `json:"body"` // in Markdown format
-	//Labels []string `json:"labels"`  // request labels and response labels are different
+	//Labels []string `json:"labels"`  // request labels ([]string) and response labels (map[string]RawMessage) are different
 }
 
 func (edit *EditableIssue) Edit() error {
@@ -51,13 +54,6 @@ func (edit *EditableIssue) Edit() error {
 	defer os.Remove(tempfile.Name())
 
 	encoder := json.NewEncoder(tempfile)
-	/*
-		err = encoder.Encode(map[string]string{
-			"title": edit.Title,
-			"state": edit.State,
-			"body":  edit.Body,
-		})
-	*/
 	err = encoder.Encode(edit)
 	if err != nil {
 		log.Fatal(err)
@@ -89,21 +85,5 @@ func (edit *EditableIssue) Edit() error {
 		fmt.Println("Decode error")
 		log.Fatal(err)
 	}
-	/*
-		fields := make(map[string]string)
-		if err = json.NewDecoder(tempfile).Decode(&fields); err != nil {
-			fmt.Println("Decode error")
-			log.Fatal(err)
-		}
-		edit.title=fields["title"]
-		edit.state=fields["state"]
-		edit.body=fields["body"]
-	*/
-	//fmt.Printf("edit to post: %v\n", edit)
 	return nil
-}
-
-type User struct {
-	Login   string
-	HTMLURL string `json:"html_url"`
 }

@@ -1,5 +1,4 @@
-all:
-	#go run main.go search tesujiro/ago
+list:
 	go run main.go search tesujiro/ProgrammingLanguageGo
 
 create:
