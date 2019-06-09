@@ -31,6 +31,34 @@ func SearchIssues(owner, repo string) (IssuesSearchResult, error) {
 	return result, nil
 }
 
+func CreateIssue(owner, repo string) (*Issue, error) {
+	api := new(GitHubAPI)
+	api.setUrlPath("repos", owner, repo, "issues")
+
+	issue := EditableIssue{Title: "gopl exercise 4.11", State: "open"}
+	if err := issue.Edit(); err != nil {
+		log.Fatal(err)
+	}
+	jsonStr, err := json.Marshal(issue)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("json: %s\n", jsonStr)
+	buf := bytes.NewBuffer(jsonStr)
+
+	resp, err := api.post(buf)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var ret Issue
+	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
 func ReadIssue(owner, repo string, number int) (*Issue, error) {
 	api := new(GitHubAPI)
 	api.setUrlPath("repos", owner, repo, "issues", strconv.Itoa(number))
@@ -52,17 +80,57 @@ func ReadIssue(owner, repo string, number int) (*Issue, error) {
 	return &issue, nil
 }
 
-func CreateIssue(owner, repo string) (*Issue, error) {
-	api := new(GitHubAPI)
-	api.setUrlPath("repos", owner, repo, "issues")
+func UpdateIssue(owner, repo string, number int) (*Issue, error) {
+	issue, err := ReadIssue(owner, repo, number)
+	if err != nil {
+		log.Print("Read issue error")
+		return nil, err
+	}
 
-	issue := EditableIssue{Title: "gopl exercise 4.11", State: "open"}
-	if err := issue.Edit(); err != nil {
+	api := new(GitHubAPI)
+	api.setUrlPath("repos", owner, repo, "issues", strconv.Itoa(number))
+
+	if err := issue.EditableIssue.Edit(); err != nil {
 		log.Fatal(err)
 	}
-	jsonStr, err := json.Marshal(issue)
+	jsonStr, err := json.Marshal(issue.EditableIssue)
 	if err != nil {
 		log.Fatal(err)
+	}
+	fmt.Printf("json: %s\n", jsonStr)
+	buf := bytes.NewBuffer(jsonStr)
+
+	resp, err := api.post(buf)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var ret Issue
+	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return &ret, nil
+}
+
+func CloseIssue(owner, repo string, number int) (*Issue, error) {
+	issue, err := ReadIssue(owner, repo, number)
+	if err != nil {
+		log.Print("Read issue error")
+		return nil, err
+	}
+
+	if issue.State == "closed" {
+		return nil, fmt.Errorf("issue #%v already closed", number)
+	}
+
+	api := new(GitHubAPI)
+	api.setUrlPath("repos", owner, repo, "issues", strconv.Itoa(number))
+
+	issue.State = "close"
+	jsonStr, err := json.Marshal(issue.EditableIssue)
+	if err != nil {
+		return nil, err
 	}
 	fmt.Printf("json: %s\n", jsonStr)
 	buf := bytes.NewBuffer(jsonStr)
