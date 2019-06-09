@@ -4,6 +4,7 @@ package github
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -33,6 +34,31 @@ func (api *GitHubAPI) get() (*http.Response, error) {
 		return nil, fmt.Errorf("search query failed: %s", resp.Status)
 	}
 
+	return resp, err
+}
+
+func (api *GitHubAPI) post(body io.Reader) (*http.Response, error) {
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", api.url, body)
+
+	github_user := os.Getenv("GITHUB_USER")
+	github_pass := os.Getenv("GITHUB_PASS")
+	if github_user == "" || github_pass == "" {
+		log.Fatal("env not set: GITHUB_USER, GITHUB_PASS")
+	}
+	req.SetBasicAuth(github_user, github_pass)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode >= 300 {
+		log.Print("API response status error")
+		return nil, fmt.Errorf("failed to edit issue: %s", resp.Status)
+	}
 	return resp, err
 }
 
