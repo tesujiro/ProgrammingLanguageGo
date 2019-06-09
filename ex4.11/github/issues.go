@@ -10,9 +10,9 @@ import (
 )
 
 // SearchIssues queries the GitHub issue tracker.
-func SearchIssues(repo string) (IssuesSearchResult, error) {
+func SearchIssues(owner, repo string) (IssuesSearchResult, error) {
 	api := new(GitHubAPI)
-	api.setUrlPath("repos", repo, "issues")
+	api.setUrlPath("repos", owner, repo, "issues")
 
 	resp, err := api.get()
 	if err != nil {

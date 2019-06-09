@@ -19,9 +19,9 @@ func main() {
 	args := os.Args[2:]
 
 	switch {
-	case cmd == "search" && len(args) == 1:
-		repo := args[0]
-		result, err := github.SearchIssues(repo)
+	case cmd == "search" && len(args) == 2:
+		owner, repo := args[0], args[1]
+		result, err := github.SearchIssues(owner, repo)
 		if err != nil {
 			log.Fatal(err)
 		}
