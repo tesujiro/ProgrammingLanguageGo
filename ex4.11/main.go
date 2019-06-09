@@ -10,9 +10,20 @@ import (
 	"github.com/tesujiro/ProgrammingLanguageGo/ex4.11/github"
 )
 
+func usage() {
+	fmt.Println("Usage:")
+	fmt.Print(`	issue search [owner] [repo]
+	issue create [owner] [repo]
+	issue read   [owner] [repo] [issue #]
+	issue update [owner] [repo] [issue #]
+	issue close  [owner] [repo] [issue #]
+Environ variables "GITHUB_USER", "GITHUB_PASS", "EDITOR" are used.
+`)
+}
+
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("argument error")
+		usage()
 		os.Exit(1)
 	}
 	cmd := os.Args[1]
@@ -80,7 +91,7 @@ func main() {
 		fmt.Printf("#%-5d closed.\n", issue.Number)
 
 	default:
-		fmt.Println("argument error")
+		usage()
 		os.Exit(1)
 	}
 
