@@ -6,18 +6,34 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
+// GitHub API V3 URL
 const APIURL = "https://api.github.com"
 
 type GitHubAPI struct {
 	url string
 }
 
-func (api *GitHubAPI) setUrlPath(list []string) {
+func (api *GitHubAPI) setUrlPath(list ...string) {
+	urlpath := append([]string{APIURL}, list...)
+	api.url = strings.Join(urlpath, "/")
+}
+
+func (api *GitHubAPI) get() (*http.Response, error) {
+	resp, err := http.Get(api.url)
+
+	if resp.StatusCode != http.StatusOK {
+		log.Print("API response status error")
+		return nil, fmt.Errorf("search query failed: %s", resp.Status)
+	}
+
+	return resp, err
 }
 
 type IssuesSearchResult []Issue

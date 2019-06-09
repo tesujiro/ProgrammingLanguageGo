@@ -4,11 +4,56 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
+
+// SearchIssues queries the GitHub issue tracker.
+func SearchIssues(repo string) (IssuesSearchResult, error) {
+	api := new(GitHubAPI)
+	api.setUrlPath("repos", repo, "issues")
+
+	resp, err := api.get()
+	if err != nil {
+		log.Print("API call error")
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	//fmt.Printf("response body: %s\n", body)
+	var result IssuesSearchResult
+	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&result); err != nil {
+		log.Print("Decode error")
+		return nil, err
+	}
+	return result, nil
+}
+
+func ReadIssue(owner, repo string, number int) (*Issue, error) {
+	api := new(GitHubAPI)
+	api.setUrlPath("repos", owner, repo, "issues", strconv.Itoa(number))
+
+	resp, err := api.get()
+	if err != nil {
+		log.Print("API call error")
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	//fmt.Printf("response body: %s\n", body)
+	var issue Issue
+	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&issue); err != nil {
+		log.Print("Decode error")
+		return nil, err
+	}
+	return &issue, nil
+}
 
 func CreateIssue(owner, repo string) (*Issue, error) {
 	issue := EditableIssue{Title: "gopl exercise 4.11", State: "open"}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/tesujiro/ProgrammingLanguageGo/ex4.11/github"
@@ -26,9 +27,9 @@ func main() {
 		}
 		fmt.Printf("%d issues:\n", len(result))
 
-		for _, item := range result {
+		for _, issue := range result {
 			fmt.Printf("#%-5d %v %10.10s %.55s\n",
-				item.Number, item.CreatedAt.In(time.Local), string(item.User["login"]), item.Title)
+				issue.Number, issue.CreatedAt.In(time.Local), string(issue.User["login"]), issue.Title)
 		}
 	case cmd == "create" && len(args) == 2:
 		owner, repo := args[0], args[1]
@@ -37,6 +38,19 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Printf("new issue: #%v\n", (*result).Number)
+
+	case cmd == "read" && len(args) == 3:
+		owner, repo, numberStr := args[0], args[1], args[2]
+		number, err := strconv.Atoi(numberStr)
+		if err != nil {
+			log.Fatalf("issue number format error: %v", numberStr)
+		}
+		issue, err := github.ReadIssue(owner, repo, number)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("#%-5d %v %10.10s %.55s\n",
+			issue.Number, issue.CreatedAt.In(time.Local), string(issue.User["login"]), issue.Title)
 
 	default:
 		fmt.Println("argument error")
