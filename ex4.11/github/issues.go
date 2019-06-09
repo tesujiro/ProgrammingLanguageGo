@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strconv"
 )
 
@@ -16,7 +15,6 @@ func SearchIssues(owner, repo string) (IssuesSearchResult, error) {
 
 	resp, err := api.get()
 	if err != nil {
-		log.Print("API call error")
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -25,7 +23,6 @@ func SearchIssues(owner, repo string) (IssuesSearchResult, error) {
 	//fmt.Printf("response body: %s\n", body)
 	var result IssuesSearchResult
 	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&result); err != nil {
-		log.Print("Decode error")
 		return nil, err
 	}
 	return result, nil
@@ -37,11 +34,11 @@ func CreateIssue(owner, repo string) (*Issue, error) {
 
 	issue := EditableIssue{Title: "gopl exercise 4.11", State: "open"}
 	if err := issue.Edit(); err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("Edit issue error: %v", err)
 	}
 	jsonStr, err := json.Marshal(issue)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("Marshal issue error: %v", err)
 	}
 	fmt.Printf("json: %s\n", jsonStr)
 	buf := bytes.NewBuffer(jsonStr)
@@ -54,7 +51,7 @@ func CreateIssue(owner, repo string) (*Issue, error) {
 
 	var ret Issue
 	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Unmarshal http response error: %v", err)
 	}
 	return &ret, nil
 }
@@ -65,7 +62,6 @@ func ReadIssue(owner, repo string, number int) (*Issue, error) {
 
 	resp, err := api.get()
 	if err != nil {
-		log.Print("API call error")
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -74,8 +70,7 @@ func ReadIssue(owner, repo string, number int) (*Issue, error) {
 	//fmt.Printf("response body: %s\n", body)
 	var issue Issue
 	if err := json.NewDecoder(bytes.NewReader(body)).Decode(&issue); err != nil {
-		log.Print("Decode error")
-		return nil, err
+		return nil, fmt.Errorf("Unmarshal http response error: %v", err)
 	}
 	return &issue, nil
 }
@@ -83,19 +78,18 @@ func ReadIssue(owner, repo string, number int) (*Issue, error) {
 func UpdateIssue(owner, repo string, number int) (*Issue, error) {
 	issue, err := ReadIssue(owner, repo, number)
 	if err != nil {
-		log.Print("Read issue error")
-		return nil, err
+		return nil, fmt.Errorf("Read issue error: %v", err)
 	}
 
 	api := new(GitHubAPI)
 	api.setUrlPath("repos", owner, repo, "issues", strconv.Itoa(number))
 
 	if err := issue.EditableIssue.Edit(); err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("Edit issue error: %v", err)
 	}
 	jsonStr, err := json.Marshal(issue.EditableIssue)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("Marshal issue error: %v", err)
 	}
 	fmt.Printf("json: %s\n", jsonStr)
 	buf := bytes.NewBuffer(jsonStr)
@@ -108,7 +102,7 @@ func UpdateIssue(owner, repo string, number int) (*Issue, error) {
 
 	var ret Issue
 	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Unmarshal http response error: %v", err)
 	}
 	return &ret, nil
 }
@@ -116,8 +110,7 @@ func UpdateIssue(owner, repo string, number int) (*Issue, error) {
 func CloseIssue(owner, repo string, number int) (*Issue, error) {
 	issue, err := ReadIssue(owner, repo, number)
 	if err != nil {
-		log.Print("Read issue error")
-		return nil, err
+		return nil, fmt.Errorf("Read issue error: %v", err)
 	}
 
 	if issue.State == "closed" {
@@ -130,7 +123,7 @@ func CloseIssue(owner, repo string, number int) (*Issue, error) {
 	issue.State = "close"
 	jsonStr, err := json.Marshal(issue.EditableIssue)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Marshal issue error: %v", err)
 	}
 	fmt.Printf("json: %s\n", jsonStr)
 	buf := bytes.NewBuffer(jsonStr)
@@ -143,7 +136,7 @@ func CloseIssue(owner, repo string, number int) (*Issue, error) {
 
 	var ret Issue
 	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Unmarshal http response error: %v", err)
 	}
 	return &ret, nil
 }

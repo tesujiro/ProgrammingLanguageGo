@@ -31,7 +31,7 @@ func (api *GitHubAPI) get() (*http.Response, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		log.Print("API response status error")
-		return nil, fmt.Errorf("search query failed: %s", resp.Status)
+		return nil, fmt.Errorf("Http response status: %v", resp.Status)
 	}
 
 	return resp, err
@@ -45,7 +45,7 @@ func (api *GitHubAPI) post(body io.Reader) (*http.Response, error) {
 	github_user := os.Getenv("GITHUB_USER")
 	github_pass := os.Getenv("GITHUB_PASS")
 	if github_user == "" || github_pass == "" {
-		log.Fatal("env not set: GITHUB_USER, GITHUB_PASS")
+		return nil, fmt.Errorf("env not set: GITHUB_USER, GITHUB_PASS")
 	}
 	req.SetBasicAuth(github_user, github_pass)
 	if err != nil {
@@ -56,8 +56,7 @@ func (api *GitHubAPI) post(body io.Reader) (*http.Response, error) {
 		return nil, err
 	}
 	if resp.StatusCode >= 300 {
-		log.Print("API response status error")
-		return nil, fmt.Errorf("failed to edit issue: %s", resp.Status)
+		return nil, fmt.Errorf("Http response status: %v", resp.Status)
 	}
 	return resp, err
 }
@@ -86,11 +85,11 @@ func (edit *EditableIssue) Edit() error {
 	}
 	editorPath, err := exec.LookPath(editor)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Look editor path error: %v", err)
 	}
 	tempfile, err := ioutil.TempFile("", "issue_crud")
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Create temporary file error: %v", err)
 	}
 	defer tempfile.Close()
 	defer os.Remove(tempfile.Name())
@@ -98,7 +97,7 @@ func (edit *EditableIssue) Edit() error {
 	encoder := json.NewEncoder(tempfile)
 	err = encoder.Encode(edit)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Encoding Json error: %v", err)
 	}
 
 	cmd := &exec.Cmd{
@@ -110,22 +109,21 @@ func (edit *EditableIssue) Edit() error {
 	}
 	err = cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Run command (%v %v) error: %v", editorPath, tempfile.Name(), err)
 	}
 
 	// Reopen the file
 	tempfile.Close()
 	tempfile, err = os.Open(tempfile.Name())
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Reopen temporary file error: %v", err)
 	}
 	_, err = tempfile.Seek(0, 0)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Seek temporary file error: %v", err)
 	}
 	if err = json.NewDecoder(tempfile).Decode(&edit); err != nil {
-		fmt.Println("Decode error")
-		log.Fatal(err)
+		return fmt.Errorf("Decoding Json temporary file error: %v", err)
 	}
 	return nil
 }
