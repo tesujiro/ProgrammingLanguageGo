@@ -6,4 +6,4 @@ index:
 	./xkcd index comics.idx
 
 search:
-	./xkcd search comics.idx xxx
+	./xkcd search comics.idx red

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/gob"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/tesujiro/ProgrammingLanguageGo/ex4.12/api"
 )
@@ -15,6 +18,8 @@ func usage() {
 	xkcd search [filename] [term]
 `)
 }
+
+type Index map[string][]int
 
 func main() {
 	if len(os.Args) < 2 {
@@ -28,12 +33,12 @@ func main() {
 	case cmd == "get" && len(args) == 1:
 	case cmd == "index" && len(args) == 1:
 		filename := args[0]
-		comics, err := index()
+		comics, idx, err := index()
 		if err != nil {
 			fmt.Printf("get description error: %v\n", err)
 			os.Exit(1)
 		}
-		err = save(comics, filename)
+		err = save(comics, idx, filename)
 		if err != nil {
 			fmt.Printf("save index error: %v\n", err)
 			os.Exit(1)
@@ -41,21 +46,30 @@ func main() {
 		fmt.Printf("Indexing completed: %v\n", filename)
 	case cmd == "search" && len(args) >= 2:
 		filename := args[0]
-		//words := args[1:]
-		comics, err := load(filename)
+		words := args[1:]
+		comics, idx, err := load(filename)
 		if err != nil {
 			fmt.Printf("load index error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Loading completed: %v\n", comics)
+		fmt.Printf("Loading completed: %v comics\n", len(comics))
 
 		/*
-			err, results := search(comics, words)
-			if err != nil {
-				fmt.Printf("search word error: %v\n", err)
-				os.Exit(1)
+			// DUMP INDEZX
+			for word, idx := range idx {
+				fmt.Printf("%v: %v\n", word, idx)
 			}
 		*/
+
+		results, err := idx.search(words)
+		if err != nil {
+			fmt.Printf("search word error: %v\n", err)
+			os.Exit(1)
+		}
+		for _, num := range results {
+			comic := comics[num]
+			fmt.Printf("[%v]:\n%v\n\n", comic.Title, comic.Transcript)
+		}
 
 	default:
 		usage()
@@ -63,15 +77,16 @@ func main() {
 	}
 }
 
-func index() ([]api.Comic, error) {
+func index() ([]api.Comic, Index, error) {
+	// Get max comic number
 	max, err := api.GetMaxNumber()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	fmt.Println("max =", max)
 	max = 10 // temporary
 
-	// Get Descriptions
+	// Start Worker for fetching cosmic descriptions
 	workers := 5
 	comics := make([]api.Comic, max)
 	req := make(chan int, workers)
@@ -95,26 +110,50 @@ func index() ([]api.Comic, error) {
 	}
 	close(req)
 
+	// Get Descriptions
 	for i := 1; i <= max; i++ {
 		comic := <-res
 		fmt.Printf("comics[%v]=%v\n", comic.Num-1, comic.Title)
 		comics[comic.Num-1] = comic
 	}
 
-	return comics, nil
-}
-
-/*
-func search(comics []api.Comic, words []string) ([]api.Comic, error) {
-	found := make(map[int]int)
-
-	for _, comic := range comics {
+	// Make index from cosmic transcrit
+	idx := make(Index)
+	for i := 0; i < max; i++ {
+		comic := comics[i]
+		wordFlag := make(map[string]bool)
+		rep := regexp.MustCompile(`[^ 0-9A-Za-z]`)
+		text := rep.ReplaceAllString(comic.Transcript, "")
+		scanner := bufio.NewScanner(strings.NewReader(text))
+		scanner.Split(bufio.ScanWords)
+		for scanner.Scan() {
+			word := scanner.Text()
+			if !wordFlag[word] {
+				if _, ok := idx[word]; !ok {
+					idx[word] = make([]int, 0)
+				}
+				idx[word] = append(idx[word], comic.Num)
+				wordFlag[word] = true
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			fmt.Fprintln(os.Stderr, "reading input:", err)
+		}
 	}
-	return nil,nilk
-}
-*/
 
-func save(comics []api.Comic, filename string) error {
+	return comics, idx, nil
+}
+
+func (idx Index) search(words []string) ([]int, error) {
+	for _, word := range words {
+		if nums, ok := idx[word]; ok {
+			return nums, nil
+		}
+	}
+	return nil, nil
+}
+
+func save(comics []api.Comic, idx Index, filename string) error {
 	fd, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -126,13 +165,17 @@ func save(comics []api.Comic, filename string) error {
 	if err != nil {
 		return err
 	}
+	err = enc.Encode(idx)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func load(filename string) ([]api.Comic, error) {
+func load(filename string) ([]api.Comic, Index, error) {
 	fd, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer fd.Close()
 
@@ -140,7 +183,12 @@ func load(filename string) ([]api.Comic, error) {
 	var comics []api.Comic
 	err = dec.Decode(&comics)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return comics, nil
+	var idx Index
+	err = dec.Decode(&idx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return comics, idx, nil
 }
