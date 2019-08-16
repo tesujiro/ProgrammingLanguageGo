@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -42,13 +43,20 @@ func handleConn(c net.Conn) {
 		}
 		// NOTE: ignoring potential errors from input.Err()
 	}()
+	wg := &sync.WaitGroup{}
+LOOP:
 	for {
 		select {
 		case <-time.After(10 * time.Second):
 			fmt.Println("Server:Timeout")
-			return
+			break LOOP
 		case text := <-in:
-			echo(c, text, 1*time.Second)
+			wg.Add(1)
+			go func() {
+				echo(c, text, 1*time.Second)
+				wg.Done()
+			}()
 		}
 	}
+	wg.Wait()
 }
