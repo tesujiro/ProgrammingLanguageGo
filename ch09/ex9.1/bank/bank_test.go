@@ -33,14 +33,18 @@ func TestBank(t *testing.T) {
 
 	// Alice
 	go func() {
-		bank.Withdraw(100)
+		if got, want := bank.Withdraw(100), true; got != want {
+			t.Errorf("Withdraw(100) = %v, want %v", got, want)
+		}
 		fmt.Println("=", bank.Balance())
 		done <- struct{}{}
 	}()
 
 	// Bob
 	go func() {
-		bank.Withdraw(100)
+		if got, want := bank.Withdraw(100), true; got != want {
+			t.Errorf("Withdraw(100) = %v, want %v", got, want)
+		}
 		done <- struct{}{}
 	}()
 
@@ -48,6 +52,12 @@ func TestBank(t *testing.T) {
 	<-done
 	<-done
 
+	if got, want := bank.Balance(), 100; got != want {
+		t.Errorf("Balance = %d, want %d", got, want)
+	}
+	if got, want := bank.Withdraw(500), false; got != want {
+		t.Errorf("Withdraw(500) = %v, want %v", got, want)
+	}
 	if got, want := bank.Balance(), 100; got != want {
 		t.Errorf("Balance = %d, want %d", got, want)
 	}
