@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/tesujiro/ProgrammingLanguageGo/ch02/ex2.1-2.2/tempconv"
+	"github.com/tesujiro/TheGoProgrammingLanguage/ch02/ex2.1-2.2/tempconv"
 )
 
 func main() {

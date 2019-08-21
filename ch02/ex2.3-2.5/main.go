@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/tesujiro/ProgrammingLanguageGo/ch02/ex2.3-2.5/popcount"
+	"github.com/tesujiro/TheGoProgrammingLanguage/ch02/ex2.3-2.5/popcount"
 )
 
 func main() {

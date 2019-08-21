@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tesujiro/ProgrammingLanguageGo/ex4.11/github"
+	"github.com/tesujiro/TheGoProgrammingLanguage/ch04/ex4.11/github"
 )
 
 func usage() {

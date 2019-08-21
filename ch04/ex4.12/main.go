@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tesujiro/ProgrammingLanguageGo/ex4.12/api"
+	"github.com/tesujiro/TheGoProgrammingLanguage/ch04/ex4.12/api"
 )
 
 func usage() {

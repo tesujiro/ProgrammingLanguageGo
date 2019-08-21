@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/tesujiro/ProgrammingLanguageGo/ex4.10/github"
+	"github.com/tesujiro/TheGoProgrammingLanguage/ch04/ex4.10/github"
 )
 
 func main() {
